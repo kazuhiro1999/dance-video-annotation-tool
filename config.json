@@ -1,0 +1,104 @@
+{
+    "people": [
+        
+    ],
+    "evaluation_items": {
+        "dynamics": {
+            "name": "力強さ",
+            "description": "力的特徴、重さ、躍動感",
+            "criteria": {
+                "technique": "力の入れ具合、スピードコントロール",
+                "variation": "強弱の使い分けとバランス"
+            }
+        },
+        "sharpness": {
+            "name": "緩急",
+            "description": "動きの緩急、メリハリ",
+            "criteria": {
+                "precision": "動きの始点と終点の明確さ",
+                "control": "体の各部位のコントロール"
+            }
+        },
+        "scalability": {
+            "name": "動きの大きさ",
+            "description": "動きの大きさ、空間の使い方",
+            "criteria": {
+                "range": "動作範囲の適切さ",
+                "projection": "観客への見せ方"
+            }
+        },
+        "timing": {
+            "name": "リズム",
+            "description": "音楽とのシンクロ、リズム感",
+            "criteria": {
+                "rhythm": "基本的なビートキープ",
+                "musicality": "音楽的なアクセントとの一致"
+            }
+        },
+        "accuracy": {
+            "name": "正確さ",
+            "description": "振付の再現度、丁寧さ",
+            "criteria": {
+                "choreography": "振付の忠実な再現",
+                "pose": "体の向きや関節の角度"
+            }
+        },
+        "stability": {
+            "name": "バランス",
+            "description": "バランス、ボディコントロール",
+            "criteria": {
+                "balance": "体のバランス維持",
+                "consistency": "動きの安定性"
+            }
+        },
+        "expression": {
+            "name": "表情",
+            "description": "感情表現",
+            "criteria": {
+                "emotion": "感情の伝達力"
+            }
+        }
+    },
+    "scores": {
+        "1": {
+            "level": "振り付けの確認が必要",
+            "description": "振付の50%以上を誤っている、またはほとんど覚えていない"
+        },
+        "2": {
+            "level": "基本的な改善が必要",
+            "description": "振付は概ね覚えているが、正しい動きの形が取れない、リズムが大きくずれる"
+        },
+        "3": {
+            "level": "練習が必要",
+            "description": "基本的な動きは形になっているが、全体的に練習が必要"
+        },
+        "4": {
+            "level": "一部練習が必要",
+            "description": "基準となる動きはできているが、一部の動きに不安定さがある"
+        },
+        "5": {
+            "level": "標準",
+            "description": "基本的な動き、リズム、表現が適切に実行できている"
+        },
+        "6": {
+            "level": "標準以上",
+            "description": "基準を上回る部分が見られる"
+        },
+        "7": {
+            "level": "良い",
+            "description": "全体的に高い完成度で、印象に残る要素がある"
+        },
+        "8": {
+            "level": "とても良い",
+            "description": "高度な技術と表現力を示している"
+        },
+        "9": {
+            "level": "優れている",
+            "description": "卓越した技術を示している"
+        },
+        "10": {
+            "level": "突出している",
+            "description": "模範となる完成度と創造性を備えている"
+        }
+    }
+}

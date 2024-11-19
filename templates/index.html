@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ダンス動画アノテーションツール</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --sidebar-width: 350px;
+            --header-height: 60px;
+            --tab-section-height: 80px;
+            --container-max-width: 1500px;
+            --container-padding: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--container-padding);
+        }
+
+        .header h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            width: 100%;
+        }
+
+        .main-layout {
+            height: calc(100vh - var(--header-height));
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-section {
+            height: var(--tab-section-height);
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+        }
+
+        .tab-container {
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: 0 var(--container-padding);
+            position: relative;
+        }
+
+        .tab-scroll-area {
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-wrapper {
+            display: inline-flex;
+            gap: 0.5rem;
+            padding: 0 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background-color: #e5e7eb;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background-color: #d1d5db;
+        }
+
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .content-section {
+            flex: 1;
+            display: flex;
+            padding: 1rem var(--container-padding);
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            gap: 1rem;
+            height: calc(100vh - var(--header-height) - var(--tab-section-height));
+        }
+
+        .video-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .video-container {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        video {
+            width: 100%;
+            flex: 1;
+            background: black;
+            border-radius: 0.25rem;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .sidebar-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .timeline-container, .evaluation-container {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .timeline-container.active, .evaluation-container.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .timeline-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .timeline-item {
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .timeline-item.highlight {
+            background: #fef3c7;
+        }
+
+        .comment-input {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .comment-input textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            resize: vertical;
+        }
+
+        .comment-input button {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .evaluation-form {
+            padding: 1rem;            
+            margin-bottom: 0.5rem;
+        }
+        
+
+        .rating-item {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .rating-item label {
+            display: block;
+            font-weight: 500;
+        }
+
+        .rating-item select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+        }
+
+        .rating-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-header label {
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .info-button {
+            background: none;
+            border: none;
+            padding: 2px;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-button:hover {
+            color: var(--primary-color);
+        }
+
+        .rating-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            background-color: white;
+        }
+
+        .rating-select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .rating-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        /* ツールチップ */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]:before {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;  /* 追加: 要素の右端を基準に */
+            top: 50%;    /* 追加: 要素の垂直中央を基準に */
+            transform: translateY(-50%);  /* 追加: ツールチップを垂直方向に中央揃え */
+            margin-left: 8px;  /* 追加: 要素との間隔 */
+            padding: 0.5rem;
+            background: #1f2937;
+            color: white;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            white-space: normal;
+            width: max-content;
+            max-width: 200px;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        [data-tooltip]:hover:before {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .content-section {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 300px;
+            }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 720px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .score-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .score-item {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+
+        .score-level {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .score-details {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .score-criteria {
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .modal.active,
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .rating-header {
+            display: flex;
+            align-items: center;
+            position: relative;  
+        }
+
+        .help-button {
+            background: none;
+            border: none;
+            padding: 2px;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            right: 48px;
+            margin-top: 4px;
+        }
+
+        .help-button:hover {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>ダンス動画アノテーションツール</h1>
+    </header>
+
+    <div class="main-layout">
+        <section class="tab-section">
+            <div class="tab-container">
+                <div class="tab-scroll-area">
+                    <div class="tab-wrapper">
+                        {% for person in people %}
+                            <button class="tab" data-id="{{ person.id }}" id="tab-{{ person.id }}">{{ person.name }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="video-section">
+                <div class="video-container">
+                    <video id="video-player" controls>
+                        <source id="video-source" src="" type="video/mp4">
+                        お使いのブラウザは動画タグに対応していません。
+                    </video>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-tabs">
+                    <button class="sidebar-tab active" data-tab="timeline">タイムライン</button>
+                    <button class="sidebar-tab" data-tab="evaluation">評価
+                        <button class="help-button rating-header" onclick="showScoresModal()">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                            </svg>
+                        </button>
+                    </button>
+                </div>
+
+                <div class="sidebar-content">
+                    <div class="timeline-container active">
+                        <div class="timeline-items" id="timeline-items"></div>
+                        <div class="comment-input">
+                            <textarea id="comment-input" placeholder="コメントを入力"></textarea>
+                            <button id="submit-comment">コメントを追加</button>
+                        </div>
+                    </div>
+
+                    <div class="evaluation-container">
+                        <div class="evaluation-form">
+                            <form id="evaluation-form">
+                                {% for item, details in evaluation_items.items() %}
+                                <div class="rating-item">
+                                    <div class="rating-header">
+                                        <label>{{ details.name }}</label>
+                                        <button type="button" 
+                                                class="info-button"
+                                                aria-label="{{ details.name }}の詳細"
+                                                data-tooltip="{{ details.description }}">
+                                            <svg class="info-icon" viewBox="0 0 24 24" width="16" height="16">
+                                                <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <select name="{{ item }}" class="rating-select">
+                                        <option value="">---</option>
+                                        {% for i, score in scores.items() %}
+                                        <option value="{{ i }}">{{ i }} - {{ score.level }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="rating-description"></div>
+                                </div>
+                                {% endfor %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal-overlay" id="scores-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">評価基準の詳細</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="score-grid">
+                {% for i, score in scores.items() %}
+                <div class="score-item">
+                    <div class="score-level">{{ i }} - {{ score.level }}</div>
+                    <div class="score-details">{{ score.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPersonId = null;
+        let comments = [];
+        let evaluations = {};
+
+        // データ取得関数
+        async function fetchPersonData(personId) {
+            try {
+                const [commentsResponse, evaluationResponse] = await Promise.all([
+                    fetch(`/api/comments/${personId}`),
+                    fetch(`/api/evaluation/${personId}`)
+                ]);
+                
+                if (commentsResponse.ok) {
+                    comments = await commentsResponse.json();
+                    renderComments();
+                }
+                
+                if (evaluationResponse.ok) {
+                    const evaluation = await evaluationResponse.json();
+                    populateEvaluation(evaluation);
+                }
+            } catch (error) {
+                console.error('データの取得に失敗しました:', error);
+            }
+        }
+
+        // 評価データを保存
+        async function saveEvaluation() {
+            if (!currentPersonId) return;
+
+            const form = document.getElementById('evaluation-form');
+            const formData = new FormData(form);
+            const evaluation = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch(`/api/evaluation/${currentPersonId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(evaluation)
+                });
+
+                if (!response.ok) {
+                    throw new Error('評価の保存に失敗しました');
+                }
+            } catch (error) {
+                console.error('評価の保存に失敗しました:', error);
+            }
+        }
+
+        // コメントを保存
+        async function saveComment(comment) {
+            if (!currentPersonId) return;
+
+            try {
+                const response = await fetch(`/api/comments/${currentPersonId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(comment)
+                });
+
+                if (!response.ok) {
+                    throw new Error('コメントの保存に失敗しました');
+                }
+            } catch (error) {
+                console.error('コメントの保存に失敗しました:', error);
+            }
+        }
+
+        // 評価フォームに値を設定
+        function populateEvaluation(evaluation = {}) {
+            const form = document.getElementById('evaluation-form');
+            Array.from(form.elements).forEach((element) => {
+                if (element.tagName === 'SELECT') {
+                    // データがあれば値を設定し、なければ初期値を設定
+                    element.value = evaluation[element.name] || '';
+                }
+            });
+        }
+
+        // タブ切り替え
+        document.querySelectorAll('.sidebar-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const targetId = tab.dataset.tab;
+                document.querySelectorAll('.timeline-container, .evaluation-container').forEach(c => {
+                    c.classList.toggle('active', c.classList.contains(targetId + '-container'));
+                });
+            });
+        });
+
+        // 人物タブ切り替え
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const personId = tab.dataset.id;      
+                loadPerson(personId);
+            });
+        });
+
+        // 人物データ読み込み
+        async function loadPerson(personId) {
+            currentPersonId = personId;
+            
+            // タブのアクティブ状態を更新
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${personId}`).classList.add('active');
+
+            // 動画を読み込み
+            const videoPlayer = document.getElementById('video-player');
+            const videoSource = document.getElementById('video-source');
+            videoSource.src = `/videos/${personId}.mp4`;
+            videoPlayer.load();
+
+            // データを取得            
+            await fetchPersonData(personId);
+        }
+
+        // コメント機能
+        const videoPlayer = document.getElementById('video-player');
+        const commentInput = document.getElementById('comment-input');
+        const submitComment = document.getElementById('submit-comment');
+        const timelineItems = document.getElementById('timeline-items');
+
+        submitComment.addEventListener('click', async () => {
+            const text = commentInput.value.trim();
+            if (!text || !currentPersonId) return;
+
+            const currentTime = videoPlayer.currentTime;
+            const timestamp = new Date(currentTime * 1000).toISOString().substr(14, 8);
+
+            const newComment = {
+                time: currentTime,
+                timestamp,
+                text
+            };
+
+            await saveComment(newComment);
+            comments.push(newComment);
+            comments.sort((a, b) => a.time - b.time);
+            
+            renderComments();
+            commentInput.value = '';
+        });
+
+        function renderComments() {
+            timelineItems.innerHTML = '';
+            comments.forEach(comment => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML = `
+                    <div class="timeline-timestamp">${comment.timestamp}</div>
+                    <div class="timeline-text">${comment.text}</div>
+                `;
+                item.addEventListener('click', () => {
+                    videoPlayer.currentTime = comment.time;
+                });
+                timelineItems.appendChild(item);
+            });
+        }
+
+        // 現在再生中のコメントをハイライト
+        videoPlayer.addEventListener('timeupdate', () => {
+            const currentTime = videoPlayer.currentTime;
+            const items = document.querySelectorAll('.timeline-item');
+            
+            items.forEach((item, index) => {
+                const comment = comments[index];
+                item.classList.toggle('highlight', 
+                    comment && currentTime >= comment.time && 
+                    (index === comments.length - 1 || currentTime < comments[index + 1].time)
+                );
+            });
+        });
+
+        // 評価フォームの自動保存
+        const evaluationForm = document.getElementById('evaluation-form');
+        evaluationForm.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', () => {
+                saveEvaluation();
+            });
+        });
+
+        // 初期設定
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstTab = document.querySelector('.tab');
+            if (firstTab) {
+                const personId = firstTab.dataset.id;
+                loadPerson(personId);
+            }
+        });
+
+        // リサイズ時の調整
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 1024) {
+                const videoContainer = document.querySelector('.video-container');
+                const videoHeight = Math.floor(videoContainer.offsetWidth * 9 / 16); // 16:9のアスペクト比
+                videoContainer.style.height = `${videoHeight}px`;
+            } else {
+                document.querySelector('.video-container').style.height = '100%';
+            }
+        });
+
+        // APIエラーハンドリング用のユーティリティ関数
+        function handleApiError(error, message) {
+            console.error(message, error);
+            // ここにエラー表示のUIロジックを追加できます
+        }
+
+        // 動画の読み込みエラー処理
+        videoPlayer.addEventListener('error', (e) => {
+            handleApiError(e, '動画の読み込みに失敗しました');
+        });
+
+        // スクロール位置の保存と復元
+        let lastScrollPosition = 0;
+        
+        document.querySelector('.sidebar-tabs').addEventListener('click', (e) => {
+            if (e.target.classList.contains('sidebar-tab')) {
+                const timelineContainer = document.querySelector('.timeline-container');
+                if (timelineContainer.classList.contains('active')) {
+                    lastScrollPosition = timelineContainer.scrollTop;
+                }
+            }
+        });
+
+        // コメントリスト更新後にスクロール位置を復元
+        function restoreScrollPosition() {
+            const timelineContainer = document.querySelector('.timeline-container');
+            if (timelineContainer.classList.contains('active')) {
+                timelineContainer.scrollTop = lastScrollPosition;
+            }
+        }
+
+        // タブスクロールの改善
+        const tabScrollArea = document.querySelector('.tab-scroll-area');
+        
+        function scrollTabIntoView(tab) {
+            const tabRect = tab.getBoundingClientRect();
+            const containerRect = tabScrollArea.getBoundingClientRect();
+            
+            if (tabRect.left < containerRect.left || tabRect.right > containerRect.right) {
+                const scrollLeft = tab.offsetLeft - (containerRect.width - tab.offsetWidth) / 2;
+                tabScrollArea.scrollTo({
+                    left: scrollLeft,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // タブクリック時のスクロール処理
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                scrollTabIntoView(tab);
+            });
+        });
+
+        // 評価の説明文を表示する関数
+        function updateRatingDescription(select) {
+            const description = select.closest('.rating-item').querySelector('.rating-description');
+            const selectedOption = select.options[select.selectedIndex];
+            const score = select.value;
+            
+            if (score && scores[score]) {
+                description.textContent = scores[score].description;
+                description.style.display = 'block';
+            } else {
+                description.style.display = 'none';
+            }
+        }
+
+        // モーダルの表示・非表示の制御
+        const modal = document.getElementById('scores-modal');
+        const modalOverlay = modal.querySelector('.modal-overlay');
+        const modalClose = modal.querySelector('.modal-close');
+
+        function showScoresModal() {
+            modal.classList.add('active');
+        }
+
+        function hideScoresModal() {
+            modal.classList.remove('active');
+        }
+
+        modalClose.addEventListener('click', hideScoresModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideScoresModal();
+            }
+        });
+    </script>
+</body>
+</html>
