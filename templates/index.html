@@ -601,6 +601,44 @@
             }
         }
 
+        // コメントを更新
+        async function updateComment(commentId, updatedComment) {
+            if (!currentPersonId) return;
+
+            try {
+                const response = await fetch(`/api/comments/${currentPersonId}/${commentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedComment)
+                });
+
+                if (!response.ok) {
+                    throw new Error('コメントの更新に失敗しました');
+                }
+            } catch (error) {
+                console.error('コメントの更新に失敗しました:', error);
+            }
+        }
+
+        // コメントを削除
+        async function deleteComment(commentId) {
+            if (!currentPersonId) return;
+
+            try {
+                const response = await fetch(`/api/comments/${currentPersonId}/${commentId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('コメントの削除に失敗しました');
+                }
+            } catch (error) {
+                console.error('コメントの削除に失敗しました:', error);
+            }
+        }
+
         // 評価フォームに値を設定
         function populateEvaluation(evaluation = {}) {
             const form = document.getElementById('evaluation-form');
@@ -680,16 +718,58 @@
 
         function renderComments() {
             timelineItems.innerHTML = '';
-            comments.forEach(comment => {
+            comments.forEach((comment, index) => {
                 const item = document.createElement('div');
                 item.className = 'timeline-item';
-                item.innerHTML = `
-                    <div class="timeline-timestamp">${comment.timestamp}</div>
-                    <div class="timeline-text">${comment.text}</div>
-                `;
+
+                const timestampElement = document.createElement('div');
+                timestampElement.innerHTML = `<strong class="timeline-timestamp">[${comment.timestamp} - ${comment.timestamp}]</strong>`;
+
+                const textElement = document.createElement('div');
+                textElement.textContent = comment.text;
+                textElement.className = 'timeline-text';
+                
+                const editButton = document.createElement('img');
+                editButton.src = "/static/images/icon_edit_16x16.png";
+                editButton.style.cursor = 'pointer';
+                editButton.style.marginLeft = '10px';
+                
+                const deleteButton = document.createElement('img');
+                deleteButton.src = "/static/images/icon_delete_16x16.png";
+                deleteButton.style.cursor = 'pointer';
+                deleteButton.style.float = 'right';
+
+                item.appendChild(timestampElement);
+                timestampElement.appendChild(editButton);
+                timestampElement.appendChild(deleteButton);
+                item.appendChild(textElement);
+
                 item.addEventListener('click', () => {
                     videoPlayer.currentTime = comment.time;
                 });
+
+                // 編集ボタンのイベントリスナー
+                editButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // クリックイベントの伝播を防ぐ
+                    const currentText = textElement.textContent;
+                    const newText = prompt('コメントを編集:', currentText);
+                    if (newText !== null && newText !== ''){
+                        updateComment(index, newText);
+                        comment.text = newText;      
+                        renderComments();
+                    }
+                });
+                
+                // 削除ボタンのイベントリスナー
+                deleteButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // クリックイベントの伝播を防ぐ
+                    if (confirm('このコメントを削除しますか？')) {
+                        deleteComment(index);        
+                        comments.splice(index, 1);        
+                        renderComments();
+                    }
+                });
+
                 timelineItems.appendChild(item);
             });
         }

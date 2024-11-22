@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, abort, jsonify, render_template, request, send_from_directory
 import os
 import json 
 
@@ -29,7 +29,7 @@ def serve_video(filename):
 
 
 # コメントを提供するエンドポイント (GET, POST対応)
-@app.route('/api/comments/<filename>', methods=['GET', 'POST'])
+@app.route('/api/comments/<filename>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def serve_comments(filename):
     comment_file = os.path.join(COMMENTS_FOLDER, f"{filename}.json")
     
@@ -54,6 +54,38 @@ def serve_comments(filename):
         with open(comment_file, 'w', encoding='utf-8') as f:
             json.dump(comments, f, ensure_ascii=False, indent=4)
         return jsonify(comments), 201
+    
+@app.route('/api/comments/<person_id>/<comment_id>', methods=['PUT', 'DELETE'])
+def update_or_delete_comment(person_id, comment_id):
+    comment_file = os.path.join(COMMENTS_FOLDER, f"{person_id}.json")
+    index = int(comment_id)
+
+    if not os.path.exists(comment_file):
+        return jsonify({"error": "コメントが見つかりません"}), 404
+
+    with open(comment_file, 'r', encoding='utf-8') as f:
+        comments = json.load(f)
+
+    if request.method == 'PUT':
+        # コメントを更新
+        updated_comment = request.json
+        if index < len(comments):
+            comment = comments[index]
+            comment.update(text=updated_comment)
+        else:
+            return jsonify({"error": "該当するコメントが見つかりません"}), 404
+
+        with open(comment_file, 'w', encoding='utf-8') as f:
+            json.dump(comments, f, ensure_ascii=False, indent=4)
+        return jsonify(comments)
+
+    elif request.method == 'DELETE':
+        # コメントを削除
+        comments.pop(index)
+
+        with open(comment_file, 'w', encoding='utf-8') as f:
+            json.dump(comments, f, ensure_ascii=False, indent=4)
+        return jsonify(comments), 204
 
 
 # 評価を提供するエンドポイント (GET, POST対応)
@@ -76,6 +108,7 @@ def serve_evaluation(filename):
         with open(evaluation_file, 'w', encoding='utf-8') as f:
             json.dump(new_evaluation, f, ensure_ascii=False, indent=4)
         return jsonify(new_evaluation), 201
+    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5555, debug=True)
