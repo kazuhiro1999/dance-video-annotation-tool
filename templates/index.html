@@ -122,6 +122,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         video {
@@ -129,6 +130,92 @@
             flex: 1;
             background: black;
             border-radius: 0.25rem;
+        }
+
+        .loop-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .control-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-button:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .control-button.active {
+            color: #2196F3;
+        }
+
+        .loop-status {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .timeline-item.current-loop {
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        .timeline-markers {
+            position: relative;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: red;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .timeline-marker:hover {
+            transform: translateY(-50%) scale(1.5);
+            transition: transform 0.2s;
+        }
+
+        .marker-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            display: none;
+        }
+
+        .timeline-marker:hover .marker-tooltip {
+            display: block;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(0, 100, 255, 0.2);
+            border-radius: 4px;
         }
 
         .sidebar {
@@ -454,6 +541,14 @@
                         <source id="video-source" src="" type="video/mp4">
                         お使いのブラウザは動画タグに対応していません。
                     </video>
+                    <div class="loop-control">
+                        <button id="loop-toggle" class="control-button">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                            </svg>
+                        </button>
+                        <span id="loop-status" class="loop-status">ループ: オフ</span>
+                    </div>
                 </div>
             </div>
 
@@ -544,6 +639,7 @@
                 if (commentsResponse.ok) {
                     comments = await commentsResponse.json();
                     renderComments();
+                    createTimelineMarkers(comments);
                 }
                 
                 if (evaluationResponse.ok) {
@@ -687,7 +783,91 @@
 
             // データを取得            
             await fetchPersonData(personId);
+
+            // ループ状態をリセット
+            isLooping = false;
+            clearLoopRegion();
+            const loopToggle = document.getElementById('loop-toggle');
+            const loopStatus = document.getElementById('loop-status');
+            if (loopToggle) {
+                loopToggle.classList.remove('active');
+                loopStatus.textContent = 'ループ: オフ';
+            }
         }
+
+        // ループ機能
+        let isLooping = false;
+        let currentLoopStart = 0;
+        let currentLoopEnd = Infinity;
+
+        // ループ状態の切り替え
+        function toggleLoop() {
+            const loopToggle = document.getElementById('loop-toggle');
+            const loopStatus = document.getElementById('loop-status');
+            isLooping = !isLooping;
+            
+            loopToggle.classList.toggle('active');
+            loopStatus.textContent = `ループ: ${isLooping ? 'オン' : 'オフ'}`;
+            
+            if (isLooping) {
+                updateLoopRegion();
+            } else {
+                clearLoopRegion();
+            }
+        }
+
+        // 現在の再生位置に基づいてループ領域を更新
+        function updateLoopRegion() {
+            const videoPlayer = document.getElementById('video-player');
+            const currentTime = videoPlayer.currentTime;
+
+            // コメントを時間順にソート
+            const sortedComments = [...comments].sort((a, b) => a.time - b.time);
+            
+            // 現在のコメントと次のコメントを取得
+            let currentComment = null;
+            let nextComment = null;
+
+            for (let i = 0; i < sortedComments.length; i++) {
+                if (sortedComments[i].time <= currentTime) {
+                    currentComment = sortedComments[i];
+                } else {
+                    nextComment = sortedComments[i];
+                    break; // 最初の未来のコメントを取得したらループ終了
+                }
+            }
+
+            currentLoopStart = currentComment ? currentComment.time : 0;
+            currentLoopEnd = nextComment ? nextComment.time : videoPlayer.duration;
+            console.log("loop updated:", currentLoopStart, currentLoopEnd);
+        }
+
+        // ループ領域のクリア
+        function clearLoopRegion() {
+            currentLoopStart = 0;
+            currentLoopEnd = Infinity;
+        }
+
+        // 時間更新のハンドリング
+        function handleTimeUpdate() {
+            const videoPlayer = document.getElementById('video-player');
+            
+            if (isLooping && videoPlayer.currentTime >= currentLoopEnd) {
+                videoPlayer.currentTime = currentLoopStart;
+                videoPlayer.play();
+            }
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            // イベントリスナーの設定
+            const videoPlayer = document.getElementById('video-player');
+            videoPlayer.addEventListener('timeupdate', handleTimeUpdate);
+
+            const loopToggle = document.getElementById('loop-toggle');
+            loopToggle.addEventListener('click', toggleLoop);
+        });
+
 
         // コメント機能
         const videoPlayer = document.getElementById('video-player');
@@ -713,6 +893,10 @@
             comments.sort((a, b) => a.time - b.time);
             
             renderComments();
+            createTimelineMarkers(comments);
+            if (isLooping){
+                updateLoopRegion();
+            }
             commentInput.value = '';
         });
 
@@ -746,6 +930,9 @@
 
                 item.addEventListener('click', () => {
                     videoPlayer.currentTime = comment.time;
+                    if (isLooping) {
+                        updateLoopRegion();
+                    }
                 });
 
                 // 編集ボタンのイベントリスナー
@@ -757,6 +944,11 @@
                         updateComment(index, newText);
                         comment.text = newText;      
                         renderComments();
+                        createTimelineMarkers(comments);
+
+                        if (isLooping){
+                            updateLoopRegion();
+                        }
                     }
                 });
                 
@@ -767,6 +959,11 @@
                         deleteComment(index);        
                         comments.splice(index, 1);        
                         renderComments();
+                        createTimelineMarkers(comments);
+
+                        if (isLooping){
+                            updateLoopRegion();
+                        }
                     }
                 });
 
@@ -787,6 +984,76 @@
                 );
             });
         });
+
+        async function createTimelineMarkers(comments) {
+            const videoPlayer = document.getElementById('video-player');
+            
+            // duration が準備できるまで待つ関数
+            const waitForDuration = () => {
+                return new Promise((resolve) => {
+                    if (videoPlayer.readyState >= 1 && videoPlayer.duration > 0) {
+                        resolve();
+                    } else {
+                        videoPlayer.addEventListener('loadedmetadata', () => resolve(), { once: true });
+                    }
+                });
+            };
+
+            // duration が準備できるまで待つ
+            await waitForDuration();
+
+            const videoContainer = document.querySelector('.video-container');
+            
+            // 既存のマーカーコンテナがあれば削除
+            const existingMarkers = document.querySelector('.timeline-markers');
+            if (existingMarkers) {
+                existingMarkers.remove();
+            }
+
+            // マーカーコンテナを追加
+            const markersContainer = document.createElement('div');
+            markersContainer.className = 'timeline-markers';
+            
+            // プログレスバーを追加
+            const progressBar = document.createElement('div');
+            progressBar.className = 'timeline-progress';
+            markersContainer.appendChild(progressBar);
+
+            videoContainer.appendChild(markersContainer);
+
+            // プログレスバーの更新
+            videoPlayer.addEventListener('timeupdate', () => {
+                const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+            });
+
+            // マーカーを作成
+            comments.forEach(comment => {
+                const marker = document.createElement('div');
+                marker.className = 'timeline-marker';
+                
+                // マーカーの位置を設定
+                const position = (comment.time / videoPlayer.duration) * 100;
+                marker.style.left = `${position}%`;
+
+                // ツールチップを追加
+                const tooltip = document.createElement('div');
+                tooltip.className = 'marker-tooltip';
+                tooltip.textContent = `${comment.text}`;
+                marker.appendChild(tooltip);
+
+                // クリックイベントを追加
+                marker.addEventListener('click', () => {
+                    videoPlayer.currentTime = comment.time;
+                    videoPlayer.play();
+                    if (isLooping){
+                        updateLoopRegion();
+                    }                    
+                });
+
+                markersContainer.appendChild(marker);
+            });
+        }
 
         // 評価フォームの自動保存
         const evaluationForm = document.getElementById('evaluation-form');
