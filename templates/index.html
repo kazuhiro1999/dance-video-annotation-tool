@@ -218,6 +218,13 @@
             border-radius: 4px;
         }
 
+        .timeline-progress-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
         .sidebar {
             width: var(--sidebar-width);
             background: white;
@@ -1019,12 +1026,82 @@
             progressBar.className = 'timeline-progress';
             markersContainer.appendChild(progressBar);
 
+             // プログレスバーの背景（クリック用）を追加
+            const progressBackground = document.createElement('div');
+            progressBackground.className = 'timeline-progress-background';
+            markersContainer.appendChild(progressBackground);
+
             videoContainer.appendChild(markersContainer);
 
             // プログレスバーの更新
             videoPlayer.addEventListener('timeupdate', () => {
                 const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
                 progressBar.style.width = `${progress}%`;
+            });
+
+            // シーク処理の共通関数
+            const seek = (e) => {
+                const rect = progressBackground.getBoundingClientRect();
+                let clickPosition = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                const percentageClicked = (clickPosition / rect.width) * 100;
+                const newTime = (percentageClicked / 100) * videoPlayer.duration;
+                
+                videoPlayer.currentTime = newTime;
+                if (isLooping) {
+                    updateLoopRegion();
+                }
+            };
+
+            // 再生状態とドラッグ状態を管理する変数
+            let wasPlaying = false;
+            let isDragging = false;
+
+            // クリックイベント
+            progressBackground.addEventListener('click', (e) => {
+                if (!isDragging) {  // ドラッグ終了時のクリックイベントを防ぐ
+                    wasPlaying = !videoPlayer.paused;
+                    seek(e);
+                    if (wasPlaying) {
+                        videoPlayer.play();
+                    }
+                }
+            });
+
+            // マウスダウンイベント
+            progressBackground.addEventListener('mousedown', (e) => {
+                wasPlaying = !videoPlayer.paused;
+                isDragging = true;
+                seek(e);
+                
+                // ドラッグ中はビデオを一時停止
+                videoPlayer.pause();
+            });
+
+            // マウスムーブイベント（ドラッグ中）
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    seek(e);
+                }
+            });
+
+            // マウスアップイベント
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    if (wasPlaying) {
+                        videoPlayer.play();
+                    }
+                }
+            });
+
+            // マウスリーブイベント（ドラッグ中にウィンドウ外に出た場合）
+            document.addEventListener('mouseleave', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    if (wasPlaying) {
+                        videoPlayer.play();
+                    }
+                }
             });
 
             // マーカーを作成
