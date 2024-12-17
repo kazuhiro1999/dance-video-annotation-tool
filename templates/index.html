@@ -1247,6 +1247,22 @@
                 hideScoresModal();
             }
         });
+
+        // スペースキーで動画を再生/一時停止
+        window.addEventListener("keydown", (event) => {
+            // スペースキーを押した場合
+            if (event.code === "Space") {
+                event.preventDefault(); // ページのスクロールを防ぐ
+                const videoPlayer = document.getElementById('video-player');
+                if (videoPlayer ) {
+                    if (videoPlayer .paused) {
+                        videoPlayer .play(); // 再生
+                    } else {
+                        videoPlayer .pause(); // 一時停止
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>
