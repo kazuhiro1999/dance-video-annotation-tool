@@ -1,6 +1,7 @@
-from flask import Flask, abort, jsonify, render_template, request, send_from_directory
 import os
 import json 
+from flask import Flask, abort, jsonify, render_template, request, send_from_directory
+from translations import all_translations, localize_config
 
 app = Flask(__name__)
 
@@ -16,10 +17,18 @@ EVALUATIONS_FOLDER = os.path.join(app.root_path, 'static', 'evaluations')
 # メイン
 @app.route('/')
 def index():
-    people = config.get('people', [])
-    evaluation_items = config.get('evaluation_items', {})
-    scores = config.get('scores', {})
-    return render_template('index.html', people=people, evaluation_items=evaluation_items, scores=scores)
+    lang = request.args.get('lang', 'ja')
+    trans = all_translations.get(lang, all_translations['ja'])
+    localized_config = localize_config(config, lang)
+    
+    people = localized_config.get('people', [])
+    evaluation_items = localized_config.get('evaluation_items', {})
+    scores = localized_config.get('scores', {})
+    return render_template('index.html', 
+                           people=people, 
+                           evaluation_items=evaluation_items, 
+                           scores=scores,
+                           _=lambda x: trans.get(x, x))
 
 
 # 動画ファイルを提供するエンドポイント
