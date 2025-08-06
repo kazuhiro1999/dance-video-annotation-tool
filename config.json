@@ -1,104 +1,257 @@
 {
     "people": [
-        
+        { "id": "sample_a", "name": { "ja": "サンプルA", "en": "Sample A" } },
+        { "id": "sample_b", "name": { "ja": "サンプルB", "en": "Sample B" } },
+        { "id": "sample_c", "name": { "ja": "サンプルC", "en": "Sample C" } }
     ],
     "evaluation_items": {
         "dynamics": {
-            "name": "力強さ",
-            "description": "力的特徴、重さ、躍動感",
+            "name": { 
+                "ja": "力強さ", 
+                "en": "Dynamics" 
+            },
+            "description": { 
+                "ja": "力的特徴、重さ、躍動感", 
+                "en": "Dynamics, weight, energy" 
+            },
             "criteria": {
-                "technique": "力の入れ具合、スピードコントロール",
-                "variation": "強弱の使い分けとバランス"
+                "technique": { 
+                    "ja": "力の入れ具合、スピードコントロール", 
+                    "en": "Force control, speed variation" 
+                },
+                "variation": { 
+                    "ja": "強弱の使い分けとバランス", 
+                    "en": "Balance of strong/soft dynamics" 
+                }
             }
         },
         "sharpness": {
-            "name": "緩急",
-            "description": "動きの緩急、メリハリ",
+            "name": { 
+                "ja": "緩急", 
+                "en": "Sharpness" 
+            },
+            "description": { 
+                "ja": "動きの緩急、メリハリ", 
+                "en": "Contrasts in movement, snap" 
+            },
             "criteria": {
-                "precision": "動きの始点と終点の明確さ",
-                "control": "体の各部位のコントロール"
+                "precision": { 
+                    "ja": "動きの始点と終点の明確さ", 
+                    "en": "Clear start/end of motion" 
+                },
+                "control": { 
+                    "ja": "体の各部位のコントロール", 
+                    "en": "Body part control" 
+                }
             }
         },
         "scalability": {
-            "name": "動きの大きさ",
-            "description": "動きの大きさ、空間の使い方",
+            "name": { 
+                "ja": "動きの大きさ", 
+                "en": "Scalability" 
+            },
+            "description": { 
+                "ja": "動きの大きさ、空間の使い方", 
+                "en": "Use of space and motion range" 
+            },
             "criteria": {
-                "range": "動作範囲の適切さ",
-                "projection": "観客への見せ方"
+                "range": { 
+                    "ja": "動作範囲の適切さ", 
+                    "en": "Appropriate range of motion" 
+                },
+                "projection": { 
+                    "ja": "観客への見せ方", 
+                    "en": "Audience engagement" 
+                }
             }
         },
         "timing": {
-            "name": "リズム",
-            "description": "音楽とのシンクロ、リズム感",
+            "name": { 
+                "ja": "リズム", 
+                "en": "Timing" 
+            },
+            "description": { 
+                "ja": "音楽とのシンクロ、リズム感", 
+                "en": "Rhythm and synchronization" 
+            },
             "criteria": {
-                "rhythm": "基本的なビートキープ",
-                "musicality": "音楽的なアクセントとの一致"
+                "rhythm": { 
+                    "ja": "基本的なビートキープ", 
+                    "en": "Basic beat keeping" 
+                },
+                "musicality": { 
+                    "ja": "音楽的なアクセントとの一致", 
+                    "en": "Musical accent matching" 
+                }
             }
         },
         "accuracy": {
-            "name": "正確さ",
-            "description": "振付の再現度、丁寧さ",
+            "name": { 
+                "ja": "正確さ", 
+                "en": "Accuracy" 
+            },
+            "description": { 
+                "ja": "振付の再現度、丁寧さ", 
+                "en": "Choreography precision and care" 
+            },
             "criteria": {
-                "choreography": "振付の忠実な再現",
-                "pose": "体の向きや関節の角度"
+                "choreography": { 
+                    "ja": "振付の忠実な再現", 
+                    "en": "Faithful choreography execution" 
+                },
+                "pose": { 
+                    "ja": "体の向きや関節の角度", 
+                    "en": "Pose angles and direction" 
+                }
             }
         },
         "stability": {
-            "name": "バランス",
-            "description": "バランス、ボディコントロール",
+            "name": { 
+                "ja": "バランス", 
+                "en": "Stability" 
+            },
+            "description": { 
+                "ja": "バランス、ボディコントロール", 
+                "en": "Balance and control" 
+            },
             "criteria": {
-                "balance": "体のバランス維持",
-                "consistency": "動きの安定性"
+                "balance": { 
+                    "ja": "体のバランス維持", 
+                    "en": "Maintaining body balance" 
+                },
+                "consistency": { 
+                    "ja": "動きの安定性", 
+                    "en": "Consistency of movement" 
+                }
             }
         },
         "expression": {
-            "name": "表情",
-            "description": "感情表現",
+            "name": { 
+                "ja": "表情", 
+                "en": "Expression" 
+            },
+            "description": { 
+                "ja": "感情表現", 
+                "en": "Emotional expression" 
+            },
             "criteria": {
-                "emotion": "感情の伝達力"
+                "emotion": { 
+                    "ja": "感情の伝達力", 
+                    "en": "Emotional delivery" 
+                }
             }
         }
     },
     "scores": {
         "1": {
-            "level": "振り付けの確認が必要",
-            "description": "振付の50%以上を誤っている、またはほとんど覚えていない"
+            "level": { 
+                "ja": "振り付けの確認が必要", 
+                "en": "Needs choreography review" 
+            },
+            "description": {
+                "ja": "振付の50%以上を誤っている、またはほとんど覚えていない",
+                "en": "Over 50% incorrect or not memorized"
+            }
         },
         "2": {
-            "level": "基本的な改善が必要",
-            "description": "振付は概ね覚えているが、正しい動きの形が取れない、リズムが大きくずれる"
+            "level": { 
+                "ja": "基本的な改善が必要", 
+                "en": "Basic improvement needed" 
+            },
+            "description": {
+                "ja": "振付は概ね覚えているが、正しい動きの形が取れない、リズムが大きくずれる",
+                "en": "Mostly memorized but incorrect shape or rhythm"
+            }
         },
         "3": {
-            "level": "練習が必要",
-            "description": "基本的な動きは形になっているが、全体的に練習が必要"
+            "level": { 
+                "ja": "練習が必要", 
+                "en": "Needs practice" 
+            },
+            "description": {
+                "ja": "基本的な動きは形になっているが、全体的に練習が必要",
+                "en": "Fundamentals are present, but overall practice needed"
+            }
         },
         "4": {
-            "level": "一部練習が必要",
-            "description": "基準となる動きはできているが、一部の動きに不安定さがある"
+            "level": { 
+                "ja": "一部練習が必要", 
+                "en": "Needs partial refinement" 
+            },
+            "description": {
+                "ja": "基準となる動きはできているが、一部の動きに不安定さがある",
+                "en": "Meets basics, but some instability remains"
+            }
         },
         "5": {
-            "level": "標準",
-            "description": "基本的な動き、リズム、表現が適切に実行できている"
+            "level": { 
+                "ja": "標準", 
+                "en": "Standard" 
+            },
+            "description": {
+                "ja": "基本的な動き、リズム、表現が適切に実行できている",
+                "en": "Basic rhythm, movement, and expression are proper"
+            }
         },
         "6": {
-            "level": "標準以上",
-            "description": "基準を上回る部分が見られる"
+            "level": { 
+                "ja": "標準以上", 
+                "en": "Above standard" 
+            },
+            "description": {
+                "ja": "基準を上回る部分が見られる",
+                "en": "Some aspects exceed expectations"
+            }
         },
         "7": {
-            "level": "良い",
-            "description": "全体的に高い完成度で、印象に残る要素がある"
+            "level": { 
+                "ja": "良い", 
+                "en": "Good" 
+            },
+            "description": {
+                "ja": "全体的に高い完成度で、印象に残る要素がある",
+                "en": "Overall solid and memorable performance"
+            }
         },
         "8": {
-            "level": "とても良い",
-            "description": "高度な技術と表現力を示している"
+            "level": { 
+                "ja": "とても良い", 
+                "en": "Very good" 
+            },
+            "description": {
+                "ja": "高度な技術と表現力を示している",
+                "en": "Demonstrates advanced technique and expression"
+            }
         },
         "9": {
-            "level": "優れている",
-            "description": "卓越した技術を示している"
+            "level": { 
+                "ja": "優れている", 
+                "en": "Excellent" 
+            },
+            "description": {
+                "ja": "卓越した技術を示している",
+                "en": "Exhibits outstanding skill"
+            }
         },
         "10": {
-            "level": "突出している",
-            "description": "模範となる完成度と創造性を備えている"
+            "level": { 
+                "ja": "突出している", 
+                "en": "Exceptional" 
+            },
+            "description": {
+                "ja": "模範となる創造性を備えている",
+                "en": "Exemplary creativity and performance"
+            }
+        },
+        "-1": {
+            "level": { 
+                "ja": "評価不可", 
+                "en": "Not Evaluable" 
+            },
+            "description": {
+                "ja": "演技が確認できない、またはその他の事情により評価できない",
+                "en": "Unable to evaluate due to missing performance or other exceptional circumstances"
+            }
         }
     }
 }
